@@ -1,0 +1,7 @@
+includes/config.php
+uploads/profiles/*
+uploads/songs/*
+uploads/covers/*
+!uploads/profiles/.gitkeep
+!uploads/songs/.gitkeep
+!uploads/covers/.gitkeep
