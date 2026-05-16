@@ -169,22 +169,31 @@ function render_playlist_cover_editable(?string $imagePath, string $playlistName
 }
 
 /**
- * Clickable profile picture (submits parent form on file select).
+ * Clickable profile picture. Submits parent form on select unless $previewOnly is true.
  */
-function render_user_avatar_editable(?string $imagePath, string $displayName, string $size = 'lg'): void
-{
+function render_user_avatar_editable(
+    ?string $imagePath,
+    string $displayName,
+    string $size = 'lg',
+    bool $previewOnly = false
+): void {
     $sizeClass = $size === 'lg' ? 'lg' : ($size === 'sm' ? 'sm' : 'md');
     $alt = htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8');
     $url = upload_url($imagePath);
+    $overlayLabel = $url !== null ? 'Change photo' : 'Add photo';
 
-    echo '<label class="avatar-edit playlist-cover-edit avatar avatar--' . $sizeClass . '" title="Change profile picture">';
+    echo '<label class="avatar-edit playlist-cover-edit avatar avatar--' . $sizeClass . '"';
+    echo ' title="' . htmlspecialchars($overlayLabel, ENT_QUOTES, 'UTF-8') . '">';
     echo '<input type="file" name="profile_image" class="playlist-cover-edit__input"';
+    if ($previewOnly) {
+        echo ' data-upload-preview';
+    }
     echo ' accept="image/jpeg,image/png,image/gif,image/webp" aria-label="Upload profile picture">';
     if ($url !== null) {
         echo '<img src="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '" alt="' . $alt . '" class="avatar__img">';
     } else {
         echo '<span class="avatar__initials">' . htmlspecialchars(user_initials($displayName)) . '</span>';
     }
-    render_image_upload_overlay('Change photo');
+    render_image_upload_overlay($overlayLabel);
     echo '</label>';
 }

@@ -89,6 +89,11 @@ $pageTitle = 'Register';
 $usePlayer = false;
 require_once __DIR__ . '/elements/header.php';
 
+$avatarDisplayName = trim($form['name'] . ' ' . $form['surname']);
+if ($avatarDisplayName === '') {
+    $avatarDisplayName = 'You';
+}
+
 ?>
 <header class="page-heading">
     <h1>Create account</h1>
@@ -101,14 +106,12 @@ require_once __DIR__ . '/elements/header.php';
 <?php
 $inputClass = 'w-full rounded-md border border-spotify-elevated bg-spotify-base px-4 py-3 text-white placeholder:text-spotify-muted focus:border-spotify-green focus:outline-none focus:ring-1 focus:ring-spotify-green';
 $labelClass = 'mb-1 block text-sm font-medium text-spotify-muted';
-$fileClass = 'w-full text-sm text-spotify-muted file:mr-4 file:rounded-full file:border-0 file:bg-spotify-green file:px-4 file:py-2 file:font-semibold file:text-black hover:file:bg-spotify-green-hover';
 ?>
 
 <form method="post" id="register-form" enctype="multipart/form-data" class="mx-auto max-w-md space-y-4 rounded-xl bg-spotify-highlight p-6">
-    <div>
-        <label for="profile_image" class="<?php echo $labelClass; ?>">Profile picture <span class="text-spotify-muted">(optional)</span></label>
-        <input type="file" id="profile_image" name="profile_image" accept="image/jpeg,image/png,image/gif,image/webp" class="<?php echo $fileClass; ?>">
-        <p class="mt-1 text-xs text-spotify-muted">JPG, PNG, GIF, or WebP. You can change this later on your profile.</p>
+    <div class="register-avatar">
+        <?php render_user_avatar_editable(null, $avatarDisplayName, 'lg', true); ?>
+        <p class="register-avatar__hint">Optional · JPG, PNG, GIF, or WebP</p>
     </div>
     <div>
         <label for="name" class="<?php echo $labelClass; ?>">Name</label>
@@ -143,5 +146,7 @@ $fileClass = 'w-full text-sm text-spotify-muted file:mr-4 file:rounded-full file
         <a href="login.php" class="link-accent">Log in</a>
     </p>
 </form>
+
+<script src="assets/js/playlist-cover.js" defer></script>
 
 <?php require_once __DIR__ . '/elements/footer.php'; ?>
