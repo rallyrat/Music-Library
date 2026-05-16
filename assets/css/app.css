@@ -164,6 +164,82 @@ body.has-player main {
 }
 
 /* --------------------------------------------------------------------------
+   Home search
+   -------------------------------------------------------------------------- */
+
+.search-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    max-width: 32rem;
+}
+
+.search-bar__input {
+    flex: 1 1 12rem;
+    min-width: 0;
+    border-radius: 9999px;
+    border: 1px solid var(--spotify-elevated);
+    background-color: var(--spotify-highlight);
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    color: var(--player-text);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.search-bar__input::placeholder {
+    color: var(--player-muted);
+}
+
+.search-bar__input:focus {
+    border-color: var(--player-accent);
+    box-shadow: 0 0 0 2px rgba(29, 185, 84, 0.25);
+}
+
+.search-bar__submit {
+    flex-shrink: 0;
+    border: none;
+    border-radius: 9999px;
+    background-color: var(--player-accent);
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #000;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+.search-bar__submit:hover {
+    background-color: var(--player-accent-hover);
+    transform: scale(1.02);
+}
+
+.search-bar__clear {
+    flex-shrink: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--player-muted);
+    text-decoration: none;
+}
+
+.search-bar__clear:hover {
+    color: var(--player-text);
+    text-decoration: underline;
+}
+
+.home-search-meta {
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: var(--player-muted);
+}
+
+.home-empty {
+    color: var(--player-muted);
+}
+
+/* --------------------------------------------------------------------------
    View tabs (Home, Playlists)
    -------------------------------------------------------------------------- */
 

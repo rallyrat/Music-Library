@@ -226,6 +226,43 @@ function render_song_item(
     echo '</article>';
 }
 
+/**
+ * Songs for home/discover, optionally filtered by title or artist.
+ *
+ * @return array<int, array<string, mixed>>
+ */
+function get_discover_songs(mysqli $conn, string $search = ''): array
+{
+    $search = trim($search);
+
+    if ($search === '') {
+        $stmt = mysqli_prepare(
+            $conn,
+            'SELECT s.id, s.title, s.artist, s.file_path, g.name AS genre_name
+             FROM songs s
+             INNER JOIN genres g ON s.genre_id = g.id
+             ORDER BY s.created_at DESC'
+        );
+        mysqli_stmt_execute($stmt);
+    } else {
+        $pattern = '%' . addcslashes($search, '%_\\') . '%';
+        $stmt = mysqli_prepare(
+            $conn,
+            'SELECT s.id, s.title, s.artist, s.file_path, g.name AS genre_name
+             FROM songs s
+             INNER JOIN genres g ON s.genre_id = g.id
+             WHERE s.title LIKE ? OR s.artist LIKE ?
+             ORDER BY s.created_at DESC'
+        );
+        mysqli_stmt_bind_param($stmt, 'ss', $pattern, $pattern);
+        mysqli_stmt_execute($stmt);
+    }
+
+    $result = mysqli_stmt_get_result($stmt);
+
+    return $result ? mysqli_fetch_all($result, MYSQLI_ASSOC) : [];
+}
+
 /** @return int[] */
 function get_user_favorite_ids(mysqli $conn, int $userId): array
 {

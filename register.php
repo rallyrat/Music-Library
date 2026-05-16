@@ -4,6 +4,8 @@
  */
 require_once __DIR__ . '/includes/auth.php';
 require_once __DIR__ . '/includes/db.php';
+require_once __DIR__ . '/includes/users.php';
+require_once __DIR__ . '/includes/uploads.php';
 
 redirect_if_logged_in();
 
@@ -18,6 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'mobile' => trim($_POST['mobile'] ?? ''),
     ];
     $plainPassword = $_POST['password'] ?? '';
+    $hasProfileUpload = isset($_FILES['profile_image'])
+        && ($_FILES['profile_image']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE;
 
     if (!isset($_POST['name'], $_POST['surname'], $_POST['email'], $_POST['mobile'], $_POST['password'])
         || $form['name'] === '' || $form['surname'] === '' || $form['email'] === ''
@@ -31,6 +35,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Mobile number must be exactly 8 digits.';
     } elseif (strlen($plainPassword) < 5) {
         $error = 'Password must be at least 5 characters.';
+    } elseif ($hasProfileUpload && validate_image_upload($_FILES['profile_image']) === false) {
+        $error = 'Profile picture must be JPG, PNG, GIF, or WebP.';
     } else {
         $stmt = mysqli_prepare($conn, 'SELECT id FROM users WHERE email = ? LIMIT 1');
         mysqli_stmt_bind_param($stmt, 's', $form['email']);
@@ -45,17 +51,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $error = 'That mobile number is already registered.';
             } else {
                 $hashedPassword = password_hash($plainPassword, PASSWORD_DEFAULT);
-                $stmt = mysqli_prepare(
+                $userId = create_user(
                     $conn,
-                    'INSERT INTO users (name, surname, email, mobile, password) VALUES (?, ?, ?, ?, ?)'
+                    $form['name'],
+                    $form['surname'],
+                    $form['email'],
+                    $form['mobile'],
+                    $hashedPassword
                 );
-                mysqli_stmt_bind_param($stmt, 'sssss', $form['name'], $form['surname'], $form['email'], $form['mobile'], $hashedPassword);
 
-                if (mysqli_stmt_execute($stmt)) {
+                if ($userId === false) {
+                    $error = 'Registration failed. Please try again.';
+                } else {
+                    if ($hasProfileUpload) {
+                        $profilePath = save_image_upload(
+                            $_FILES['profile_image'],
+                            PROFILE_UPLOAD_DIR,
+                            'user_' . $userId
+                        );
+                        if ($profilePath === false || !update_user_profile_image($conn, $userId, $profilePath)) {
+                            if ($profilePath !== false) {
+                                delete_upload_file($profilePath);
+                            }
+                            header('Location: login.php?registered=1&avatar=0');
+                            exit;
+                        }
+                    }
                     header('Location: login.php?registered=1');
                     exit;
                 }
-                $error = 'Registration failed. Please try again.';
             }
         }
     }
@@ -77,9 +101,15 @@ require_once __DIR__ . '/elements/header.php';
 <?php
 $inputClass = 'w-full rounded-md border border-spotify-elevated bg-spotify-base px-4 py-3 text-white placeholder:text-spotify-muted focus:border-spotify-green focus:outline-none focus:ring-1 focus:ring-spotify-green';
 $labelClass = 'mb-1 block text-sm font-medium text-spotify-muted';
+$fileClass = 'w-full text-sm text-spotify-muted file:mr-4 file:rounded-full file:border-0 file:bg-spotify-green file:px-4 file:py-2 file:font-semibold file:text-black hover:file:bg-spotify-green-hover';
 ?>
 
-<form method="post" id="register-form" class="mx-auto max-w-md space-y-4 rounded-xl bg-spotify-highlight p-6">
+<form method="post" id="register-form" enctype="multipart/form-data" class="mx-auto max-w-md space-y-4 rounded-xl bg-spotify-highlight p-6">
+    <div>
+        <label for="profile_image" class="<?php echo $labelClass; ?>">Profile picture <span class="text-spotify-muted">(optional)</span></label>
+        <input type="file" id="profile_image" name="profile_image" accept="image/jpeg,image/png,image/gif,image/webp" class="<?php echo $fileClass; ?>">
+        <p class="mt-1 text-xs text-spotify-muted">JPG, PNG, GIF, or WebP. You can change this later on your profile.</p>
+    </div>
     <div>
         <label for="name" class="<?php echo $labelClass; ?>">Name</label>
         <input type="text" id="name" name="name" maxlength="15" required class="<?php echo $inputClass; ?>" placeholder="Name"

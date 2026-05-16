@@ -33,6 +33,27 @@ function get_all_users(mysqli $conn): array
     return mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
 }
 
+function create_user(
+    mysqli $conn,
+    string $name,
+    string $surname,
+    string $email,
+    string $mobile,
+    string $hashedPassword
+): int|false {
+    $stmt = mysqli_prepare(
+        $conn,
+        'INSERT INTO users (name, surname, email, mobile, password) VALUES (?, ?, ?, ?, ?)'
+    );
+    mysqli_stmt_bind_param($stmt, 'sssss', $name, $surname, $email, $mobile, $hashedPassword);
+
+    if (!mysqli_stmt_execute($stmt)) {
+        return false;
+    }
+
+    return (int) mysqli_insert_id($conn);
+}
+
 function update_user_profile_image(mysqli $conn, int $userId, string $imagePath): bool
 {
     $current = get_user_by_id($conn, $userId);

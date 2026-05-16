@@ -39,7 +39,11 @@ require_once __DIR__ . '/elements/header.php';
     <p>Welcome back. Sign in with your email or 8-digit mobile number.</p>
 </header>
 <?php if (isset($_GET['registered'])): ?>
-    <div class="alert">Account created. You can log in now.</div>
+    <div class="alert">Account created. You can log in now.<?php
+        if (isset($_GET['avatar']) && $_GET['avatar'] === '0') {
+            echo ' You can add a profile picture from your profile page.';
+        }
+    ?></div>
 <?php endif; ?>
 <?php if ($error !== ''): ?>
     <div class="alert alert--error"><?php echo htmlspecialchars($error); ?></div>
