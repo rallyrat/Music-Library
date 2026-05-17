@@ -141,7 +141,7 @@ function render_image_upload_overlay(string $label): void
     echo '<span class="playlist-cover-edit__overlay">';
     echo '<span class="playlist-cover-edit__overlay-inner">';
     echo '<span class="playlist-cover-edit__icon" aria-hidden="true">';
-    echo '<svg viewBox="0 0 24 24" focusable="false"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>';
+    echo '<svg width="20" height="20" viewBox="0 0 24 24" focusable="false"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg>';
     echo '</span>';
     echo '<span class="playlist-cover-edit__label">' . $labelText . '</span>';
     echo '</span></span>';

@@ -110,7 +110,9 @@ $labelClass = 'mb-1 block text-sm font-medium text-spotify-muted';
 
 <form method="post" id="register-form" enctype="multipart/form-data" class="mx-auto max-w-md space-y-4 rounded-xl bg-spotify-highlight p-6">
     <div class="register-avatar">
-        <?php render_user_avatar_editable(null, $avatarDisplayName, 'lg', true); ?>
+        <div class="register-avatar__picker">
+            <?php render_user_avatar_editable(null, $avatarDisplayName, 'lg', true); ?>
+        </div>
         <p class="register-avatar__hint">Optional · JPG, PNG, GIF, or WebP</p>
     </div>
     <div>

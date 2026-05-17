@@ -168,6 +168,8 @@ body.has-player main {
    -------------------------------------------------------------------------- */
 
 .search-bar {
+    width: 100%;
+    max-width: 28rem;
     margin-bottom: 1.25rem;
 }
 
@@ -175,6 +177,9 @@ body.has-player main {
     display: flex;
     align-items: center;
     gap: 0.75rem;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
     padding: 0 0.875rem;
     border-radius: 0.375rem;
     border: 1px solid var(--spotify-elevated);
@@ -188,14 +193,22 @@ body.has-player main {
 }
 
 .search-bar__icon {
-    flex-shrink: 0;
+    flex: 0 0 1.25rem;
     display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
     color: var(--player-muted);
 }
 
 .search-bar__icon svg {
+    display: block;
     width: 1.25rem;
     height: 1.25rem;
+    max-width: 1.25rem;
+    max-height: 1.25rem;
+    flex-shrink: 0;
     fill: currentColor;
 }
 
@@ -232,8 +245,12 @@ body.has-player main {
 }
 
 .search-bar__clear svg {
+    display: block;
     width: 1.125rem;
     height: 1.125rem;
+    max-width: 1.125rem;
+    max-height: 1.125rem;
+    flex-shrink: 0;
     fill: currentColor;
 }
 
@@ -248,6 +265,18 @@ body.has-player main {
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
+}
+
+.register-avatar__picker {
+    flex-shrink: 0;
+    width: 7rem;
+    height: 7rem;
+}
+
+.register-avatar__picker .avatar-edit {
+    display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .register-avatar__hint {
@@ -607,8 +636,12 @@ body.has-player main {
 }
 
 .playlist-cover-edit__icon svg {
+    display: block;
     width: 1.25rem;
     height: 1.25rem;
+    max-width: 1.25rem;
+    max-height: 1.25rem;
+    flex-shrink: 0;
     fill: currentColor;
 }
 
@@ -625,8 +658,16 @@ body.has-player main {
 }
 
 .avatar-edit {
+    position: relative;
     overflow: hidden;
     border-radius: 9999px;
+}
+
+.avatar-edit.avatar--lg {
+    width: 7rem;
+    height: 7rem;
+    max-width: 7rem;
+    max-height: 7rem;
 }
 
 .avatar-edit .avatar__img,
