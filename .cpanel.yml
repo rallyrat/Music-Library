@@ -2,4 +2,6 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/musiclib/public_html/
-    - /bin/rsync -av --delete --exclude='.git' --exclude='.cpanel.yml' --exclude='includes/db.php' --exclude='database/' --exclude='README.md' ./ $DEPLOYPATH
+    - /bin/rsync -rlpt --chmod=D755,F644 --no-owner --no-group --exclude='.git' --exclude='.cpanel.yml' --exclude='.vscode/' --exclude='*.zip' --exclude='includes/config.php' --exclude='includes/db.php' --exclude='database/' --exclude='README.md' ./ $DEPLOYPATH
+    - /bin/find $DEPLOYPATH -type d -exec chmod 755 {} \;
+    - /bin/find $DEPLOYPATH -type f -exec chmod 644 {} \;
