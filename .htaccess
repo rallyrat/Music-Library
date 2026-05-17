@@ -1,6 +1,11 @@
 DirectoryIndex index.php
 Options -Indexes
 
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^\.well-known/acme-challenge/ - [L]
+</IfModule>
+
 <IfModule mod_authz_core.c>
     Require all granted
 </IfModule>
