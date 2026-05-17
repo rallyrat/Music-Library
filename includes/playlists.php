@@ -201,10 +201,11 @@ function update_playlist(
     int $userId,
     string $name,
     string $description,
-    string $visibility
+    string $visibility,
+    bool $isAdmin = false
 ): bool {
     $playlist = get_playlist_by_id($conn, $playlistId);
-    if (!$playlist || !is_playlist_owner($playlist, $userId)) {
+    if (!$playlist || (!is_playlist_owner($playlist, $userId) && !$isAdmin)) {
         return false;
     }
 
@@ -215,27 +216,43 @@ function update_playlist(
 
     $visibility = $visibility === 'public' ? 'public' : 'private';
 
-    $stmt = mysqli_prepare(
-        $conn,
-        'UPDATE playlists SET name = ?, description = ?, visibility = ? WHERE id = ? AND user_id = ?'
-    );
-    mysqli_stmt_bind_param($stmt, 'sssii', $name, $description, $visibility, $playlistId, $userId);
+  if ($isAdmin) {
+        $stmt = mysqli_prepare(
+            $conn,
+            'UPDATE playlists SET name = ?, description = ?, visibility = ? WHERE id = ?'
+        );
+        mysqli_stmt_bind_param($stmt, 'sssi', $name, $description, $visibility, $playlistId);
+    } else {
+        $stmt = mysqli_prepare(
+            $conn,
+            'UPDATE playlists SET name = ?, description = ?, visibility = ? WHERE id = ? AND user_id = ?'
+        );
+        mysqli_stmt_bind_param($stmt, 'sssii', $name, $description, $visibility, $playlistId, $userId);
+    }
 
     return mysqli_stmt_execute($stmt);
 }
 
-function update_playlist_cover(mysqli $conn, int $playlistId, int $userId, string $coverPath): bool
+function update_playlist_cover(mysqli $conn, int $playlistId, int $userId, string $coverPath, bool $isAdmin = false): bool
 {
     $playlist = get_playlist_by_id($conn, $playlistId);
-    if (!$playlist || !is_playlist_owner($playlist, $userId)) {
+    if (!$playlist || (!is_playlist_owner($playlist, $userId) && !$isAdmin)) {
         return false;
     }
 
-    $stmt = mysqli_prepare(
-        $conn,
-        'UPDATE playlists SET cover_image = ? WHERE id = ? AND user_id = ?'
-    );
-    mysqli_stmt_bind_param($stmt, 'sii', $coverPath, $playlistId, $userId);
+    if ($isAdmin) {
+        $stmt = mysqli_prepare(
+            $conn,
+            'UPDATE playlists SET cover_image = ? WHERE id = ?'
+        );
+        mysqli_stmt_bind_param($stmt, 'si', $coverPath, $playlistId);
+    } else {
+        $stmt = mysqli_prepare(
+            $conn,
+            'UPDATE playlists SET cover_image = ? WHERE id = ? AND user_id = ?'
+        );
+        mysqli_stmt_bind_param($stmt, 'sii', $coverPath, $playlistId, $userId);
+    }
     $ok = mysqli_stmt_execute($stmt);
 
     if ($ok && !empty($playlist['cover_image']) && $playlist['cover_image'] !== $coverPath) {
@@ -245,15 +262,20 @@ function update_playlist_cover(mysqli $conn, int $playlistId, int $userId, strin
     return $ok;
 }
 
-function delete_playlist(mysqli $conn, int $playlistId, int $userId): bool
+function delete_playlist(mysqli $conn, int $playlistId, int $userId, bool $isAdmin = false): bool
 {
     $playlist = get_playlist_by_id($conn, $playlistId);
-    if (!$playlist || !is_playlist_owner($playlist, $userId)) {
+    if (!$playlist || (!is_playlist_owner($playlist, $userId) && !$isAdmin)) {
         return false;
     }
 
-    $stmt = mysqli_prepare($conn, 'DELETE FROM playlists WHERE id = ? AND user_id = ?');
-    mysqli_stmt_bind_param($stmt, 'ii', $playlistId, $userId);
+    if ($isAdmin) {
+        $stmt = mysqli_prepare($conn, 'DELETE FROM playlists WHERE id = ?');
+        mysqli_stmt_bind_param($stmt, 'i', $playlistId);
+    } else {
+        $stmt = mysqli_prepare($conn, 'DELETE FROM playlists WHERE id = ? AND user_id = ?');
+        mysqli_stmt_bind_param($stmt, 'ii', $playlistId, $userId);
+    }
     $ok = mysqli_stmt_execute($stmt);
 
     if ($ok && !empty($playlist['cover_image'])) {
@@ -339,7 +361,9 @@ function render_playlist_card(
     mysqli $conn,
     array $playlist,
     int $userId,
-    bool $isSavedList = false
+    bool $isSavedList = false,
+    bool $showAdminManage = false,
+    string $manageRedirect = 'index.php'
 ): void {
     $id = (int) $playlist['id'];
     $isOwner = (int) ($playlist['user_id'] ?? 0) === $userId;
@@ -386,12 +410,15 @@ function render_playlist_card(
         }
     }
 
-    if ($isOwner && !$isSavedList) {
-        echo '<a href="edit_playlist.php?id=' . urlencode((string) $id) . '" class="song-icon-btn song-icon-btn--ghost"';
+    if (($isOwner && !$isSavedList) || $showAdminManage) {
+        $redirectParam = $manageRedirect !== '' && $manageRedirect !== 'playlists.php'
+            ? '&amp;redirect=' . urlencode($manageRedirect)
+            : '';
+        echo '<a href="edit_playlist.php?id=' . urlencode((string) $id) . $redirectParam . '" class="song-icon-btn song-icon-btn--ghost"';
         echo ' aria-label="Edit playlist" title="Edit">';
         echo '<svg class="song-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm14.71-9.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
         echo '</a>';
-        echo '<a href="playlist_actions.php?action=delete&amp;playlist_id=' . urlencode((string) $id) . '"';
+        echo '<a href="playlist_actions.php?action=delete&amp;playlist_id=' . urlencode((string) $id) . $redirectParam . '"';
         echo ' class="song-icon-btn song-icon-btn--danger" aria-label="Delete playlist" title="Delete"';
         echo ' onclick="return confirm(\'Delete this playlist?\');">';
         echo '<svg class="song-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';

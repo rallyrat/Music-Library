@@ -79,6 +79,36 @@ function get_user_song(mysqli $conn, int $songId, int $userId): ?array
 }
 
 /**
+ * @return array<string, mixed>|null
+ */
+function get_song_by_id(mysqli $conn, int $songId): ?array
+{
+    $stmt = mysqli_prepare(
+        $conn,
+        'SELECT id, title, artist, genre_id, user_id, file_path FROM songs WHERE id = ? LIMIT 1'
+    );
+    mysqli_stmt_bind_param($stmt, 'i', $songId);
+    mysqli_stmt_execute($stmt);
+    $row = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+
+    return $row ?: null;
+}
+
+/**
+ * Song row for edit/delete when user owns the track or is an admin.
+ *
+ * @return array<string, mixed>|null
+ */
+function get_song_for_management(mysqli $conn, int $songId, int $userId, bool $isAdmin): ?array
+{
+    if ($isAdmin) {
+        return get_song_by_id($conn, $songId);
+    }
+
+    return get_user_song($conn, $songId, $userId);
+}
+
+/**
  * Insert a song row with a local file path.
  */
 function insert_song(
@@ -134,17 +164,23 @@ function update_song(
 }
 
 /**
- * Delete song file and database row for the owning user.
+ * Delete song file and database row (owner or admin).
  */
-function delete_user_song(mysqli $conn, int $songId, int $userId): bool
+function delete_user_song(mysqli $conn, int $songId, int $userId, bool $isAdmin = false): bool
 {
-    $song = get_user_song($conn, $songId, $userId);
+    $song = get_song_for_management($conn, $songId, $userId, $isAdmin);
     if (!$song) {
         return false;
     }
 
-    $stmt = mysqli_prepare($conn, 'DELETE FROM songs WHERE id = ? AND user_id = ?');
-    mysqli_stmt_bind_param($stmt, 'ii', $songId, $userId);
+    if ($isAdmin) {
+        $stmt = mysqli_prepare($conn, 'DELETE FROM songs WHERE id = ?');
+        mysqli_stmt_bind_param($stmt, 'i', $songId);
+    } else {
+        $stmt = mysqli_prepare($conn, 'DELETE FROM songs WHERE id = ? AND user_id = ?');
+        mysqli_stmt_bind_param($stmt, 'ii', $songId, $userId);
+    }
+
     $ok = mysqli_stmt_execute($stmt);
 
     if ($ok) {
@@ -162,7 +198,9 @@ function render_song_item(
     bool $showManageLinks = false,
     bool $showFavorite = false,
     bool $isFavorited = false,
-    int $removeFromPlaylistId = 0
+    int $removeFromPlaylistId = 0,
+    bool $showAdminManage = false,
+    string $manageRedirect = 'library.php'
 ): void {
     $title = htmlspecialchars($song['title'] ?? '');
     $artist = htmlspecialchars($song['artist'] ?? '');
@@ -210,12 +248,18 @@ function render_song_item(
         echo '</a>';
     }
 
-    if ($showManageLinks && $id > 0) {
-        echo '<a href="edit_song.php?id=' . urlencode((string) $id) . '" class="song-icon-btn song-icon-btn--ghost"';
-        echo ' aria-label="Edit song" title="Edit">';
+    if (($showManageLinks || $showAdminManage) && $id > 0) {
+        $redirectParam = $manageRedirect !== '' && $manageRedirect !== 'library.php'
+            ? '&amp;redirect=' . urlencode($manageRedirect)
+            : '';
+        echo '<a href="edit_song.php?id=' . urlencode((string) $id);
+        if ($redirectParam !== '') {
+            echo $redirectParam;
+        }
+        echo '" class="song-icon-btn song-icon-btn--ghost" aria-label="Edit song" title="Edit">';
         echo '<svg class="song-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm14.71-9.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
         echo '</a>';
-        echo '<a href="delete_song.php?id=' . urlencode((string) $id) . '" class="song-icon-btn song-icon-btn--danger"';
+        echo '<a href="delete_song.php?id=' . urlencode((string) $id) . $redirectParam . '" class="song-icon-btn song-icon-btn--danger"';
         echo ' aria-label="Delete song" title="Delete"';
         echo ' onclick="return confirm(\'Are you sure you want to delete this song?\');">';
         echo '<svg class="song-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';

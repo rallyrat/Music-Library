@@ -9,10 +9,11 @@ require_once __DIR__ . '/includes/uploads.php';
 require_login();
 
 $userId = (int) $_SESSION['user_id'];
+$isAdmin = is_admin();
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 $playlistId = (int) ($_GET['playlist_id'] ?? $_POST['playlist_id'] ?? 0);
 $songId = (int) ($_GET['song_id'] ?? $_POST['song_id'] ?? 0);
-$redirect = $_SERVER['HTTP_REFERER'] ?? 'playlists.php';
+$redirect = safe_redirect_target($_GET['redirect'] ?? $_SERVER['HTTP_REFERER'] ?? 'playlists.php');
 
 switch ($action) {
     case 'create':
@@ -59,12 +60,14 @@ switch ($action) {
         $description = trim($_POST['description'] ?? '');
         $visibility = ($_POST['visibility'] ?? 'private') === 'public' ? 'public' : 'private';
 
+        $afterUpdate = safe_redirect_target($_POST['redirect'] ?? 'playlist.php?id=' . $playlistId);
         if (!isset($_POST['name']) || $name === '' || strlen($name) > 100 || strlen($description) > 500
-            || !update_playlist($conn, $playlistId, $userId, $name, $description, $visibility)) {
+            || !update_playlist($conn, $playlistId, $userId, $name, $description, $visibility, $isAdmin)) {
             header('Location: edit_playlist.php?id=' . $playlistId . '&error=1');
             exit;
         }
-        header('Location: playlist.php?id=' . urlencode((string) $playlistId) . '&updated=1');
+        $separator = str_contains($afterUpdate, '?') ? '&' : '?';
+        header('Location: ' . $afterUpdate . $separator . 'updated=1');
         exit;
 
     case 'update_cover':
@@ -77,7 +80,7 @@ switch ($action) {
             exit;
         }
         $coverPath = save_image_upload($_FILES['cover_image'], PLAYLIST_COVER_DIR, 'playlist_' . $playlistId);
-        if ($coverPath === false || !update_playlist_cover($conn, $playlistId, $userId, $coverPath)) {
+        if ($coverPath === false || !update_playlist_cover($conn, $playlistId, $userId, $coverPath, $isAdmin)) {
             delete_upload_file($coverPath !== false ? $coverPath : null);
             header('Location: playlist.php?id=' . $playlistId . '&error=invalid_cover');
             exit;
@@ -86,10 +89,12 @@ switch ($action) {
         exit;
 
     case 'delete':
-        if ($playlistId > 0) {
-            delete_playlist($conn, $playlistId, $userId);
+        if ($playlistId > 0 && delete_playlist($conn, $playlistId, $userId, $isAdmin)) {
+            $separator = str_contains($redirect, '?') ? '&' : '?';
+            header('Location: ' . $redirect . $separator . 'deleted=1');
+            exit;
         }
-        header('Location: playlists.php?deleted=1');
+        header('Location: ' . $redirect);
         exit;
 
     case 'save':

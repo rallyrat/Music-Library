@@ -20,9 +20,12 @@ if ($playlistId <= 0) {
     exit;
 }
 
+$isAdmin = is_admin();
+$returnTo = safe_redirect_target($_GET['redirect'] ?? 'playlists.php');
+
 $playlist = get_playlist_by_id($conn, $playlistId);
-if (!$playlist || !is_playlist_owner($playlist, $userId)) {
-    header('Location: playlists.php');
+if (!$playlist || (!is_playlist_owner($playlist, $userId) && !$isAdmin)) {
+    header('Location: ' . $returnTo);
     exit;
 }
 
@@ -48,6 +51,7 @@ $labelClass = 'mb-1 block text-sm font-medium text-spotify-muted';
 <form method="post" action="playlist_actions.php" id="edit-playlist-form" class="max-w-lg space-y-4" novalidate>
     <input type="hidden" name="action" value="update">
     <input type="hidden" name="playlist_id" value="<?php echo $playlistId; ?>">
+    <input type="hidden" name="redirect" value="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>">
 
     <div>
         <label for="playlist-name" class="<?php echo $labelClass; ?>">Name</label>
@@ -72,7 +76,7 @@ $labelClass = 'mb-1 block text-sm font-medium text-spotify-muted';
         <button type="submit" class="rounded-full bg-spotify-green px-8 py-3 text-sm font-bold text-black hover:bg-spotify-green-hover">
             Save changes
         </button>
-        <a href="playlist.php?id=<?php echo urlencode((string) $playlistId); ?>" class="inline-flex items-center rounded-full border border-spotify-elevated px-8 py-3 text-sm font-semibold text-white hover:border-white">
+        <a href="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>" class="inline-flex items-center rounded-full border border-spotify-elevated px-8 py-3 text-sm font-semibold text-white hover:border-white">
             Cancel
         </a>
     </div>

@@ -20,17 +20,21 @@ require_once __DIR__ . '/elements/header.php';
 block_guest_content('editing songs');
 
 $userId = (int) $_SESSION['user_id'];
+$isAdmin = is_admin();
+$returnTo = safe_redirect_target($_GET['redirect'] ?? $_POST['redirect'] ?? 'library.php');
 
 if ($songId <= 0) {
-    header('Location: library.php');
+    header('Location: ' . $returnTo);
     exit;
 }
 
-$song = get_user_song($conn, $songId, $userId);
+$song = get_song_for_management($conn, $songId, $userId, $isAdmin);
 if (!$song) {
-    header('Location: library.php');
+    header('Location: ' . $returnTo);
     exit;
 }
+
+$ownerId = (int) $song['user_id'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_song'])) {
     $title = trim($_POST['title'] ?? '');
@@ -59,8 +63,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_song'])) {
         }
 
         if ($error === '') {
-            if (update_song($conn, $songId, $userId, $title, $artist, $genreId, $newFilePath, $song['file_path'])) {
-                header('Location: library.php?updated=1');
+            if (update_song($conn, $songId, $ownerId, $title, $artist, $genreId, $newFilePath, $song['file_path'])) {
+                $separator = str_contains($returnTo, '?') ? '&' : '?';
+                header('Location: ' . $returnTo . $separator . 'updated=1');
                 exit;
             }
             if ($newFilePath !== null) {
@@ -94,6 +99,7 @@ $currentFile = basename($song['file_path'] ?? 'Unknown');
 <form method="post" enctype="multipart/form-data" id="edit-song-form" class="mx-auto max-w-lg space-y-4 rounded-xl bg-spotify-highlight p-6">
     <input type="hidden" name="edit_song" value="1">
     <input type="hidden" name="song_id" value="<?php echo (int) $song['id']; ?>">
+    <input type="hidden" name="redirect" value="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>">
 
     <div>
         <label for="song-title" class="<?php echo $labelClass; ?>">Title</label>
@@ -129,7 +135,7 @@ $currentFile = basename($song['file_path'] ?? 'Unknown');
                 class="rounded-full bg-spotify-green px-8 py-3 text-sm font-bold text-black transition hover:scale-105 hover:bg-spotify-green-hover">
             Save changes
         </button>
-        <a href="library.php"
+        <a href="<?php echo htmlspecialchars($returnTo, ENT_QUOTES, 'UTF-8'); ?>"
            class="inline-flex items-center rounded-full border border-spotify-elevated px-8 py-3 text-sm font-semibold text-white transition hover:border-white">
             Cancel
         </a>

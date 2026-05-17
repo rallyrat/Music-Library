@@ -10,8 +10,14 @@ require_login();
 
 $songId = (int) ($_GET['id'] ?? 0);
 $userId = (int) $_SESSION['user_id'];
+$isAdmin = is_admin();
+$redirect = safe_redirect_target($_GET['redirect'] ?? 'library.php');
 
-delete_user_song($conn, $songId, $userId);
+if ($songId > 0 && delete_user_song($conn, $songId, $userId, $isAdmin)) {
+    $separator = str_contains($redirect, '?') ? '&' : '?';
+    header('Location: ' . $redirect . $separator . 'deleted=1');
+    exit;
+}
 
-header('Location: library.php?deleted=1');
+header('Location: ' . $redirect);
 exit;

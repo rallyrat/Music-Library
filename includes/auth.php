@@ -49,6 +49,55 @@ function redirect_if_logged_in(): void
     }
 }
 
+/** Greeting for the home page based on server local time. */
+function get_time_greeting(): string
+{
+    $hour = (int) date('G');
+
+    if ($hour >= 5 && $hour < 12) {
+        return 'Good morning';
+    }
+    if ($hour >= 12 && $hour < 17) {
+        return 'Good afternoon';
+    }
+    if ($hour >= 17 && $hour < 22) {
+        return 'Good evening';
+    }
+
+    return 'Good night';
+}
+
+/**
+ * Allow only same-site relative redirects (prevents open redirects).
+ */
+function safe_redirect_target(string $target, string $fallback = 'index.php'): string
+{
+    $target = trim($target);
+    if ($target === '' || preg_match('#^https?://#i', $target)) {
+        return $fallback;
+    }
+
+    $path = strtok($target, '?');
+    $basename = basename($path);
+    $allowed = ['index.php', 'library.php', 'favorites.php', 'playlist.php', 'playlists.php'];
+
+    if (!in_array($basename, $allowed, true)) {
+        return $fallback;
+    }
+
+    return $target;
+}
+
+/** Name/surname: letters, spaces, hyphens, and apostrophes only. */
+function is_valid_person_name(string $value): bool
+{
+    if ($value === '' || strlen($value) > 15) {
+        return false;
+    }
+
+    return (bool) preg_match("/^[A-Za-z][A-Za-z\s'-]*$/", $value);
+}
+
 /**
  * Verify password (bcrypt). Upgrades legacy plain-text passwords stored in the DB.
  */

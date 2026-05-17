@@ -18,9 +18,18 @@
 
     var registerForm = document.getElementById('register-form');
     if (registerForm) {
+        var namePattern = /^[A-Za-z][A-Za-z\s'-]*$/;
         createValidator(registerForm)
-            .addField('#name', [{ rule: 'required' }, { rule: 'maxLength', value: 15 }])
-            .addField('#surname', [{ rule: 'required' }, { rule: 'maxLength', value: 15 }])
+            .addField('#name', [
+                { rule: 'required' },
+                { rule: 'maxLength', value: 15 },
+                { rule: 'customRegexp', value: namePattern, errorMessage: 'Name can only contain letters' },
+            ])
+            .addField('#surname', [
+                { rule: 'required' },
+                { rule: 'maxLength', value: 15 },
+                { rule: 'customRegexp', value: namePattern, errorMessage: 'Surname can only contain letters' },
+            ])
             .addField('#email', [{ rule: 'required' }, { rule: 'email' }])
             .addField('#mobile', [
                 { rule: 'required' },

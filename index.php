@@ -12,11 +12,16 @@ $pageTitle = 'Home';
 require_once __DIR__ . '/elements/header.php';
 
 $isLoggedIn = is_logged_in();
+$isAdmin = $isLoggedIn && is_admin();
 $userId = $isLoggedIn ? (int) $_SESSION['user_id'] : 0;
 $favoriteIds = $isLoggedIn ? get_user_favorite_ids($conn, $userId) : [];
 $publicPlaylists = get_public_playlists_for_home($conn, $userId);
 
 $searchQuery = trim($_GET['q'] ?? '');
+$homeRedirect = 'index.php';
+if ($searchQuery !== '') {
+    $homeRedirect .= '?q=' . rawurlencode($searchQuery);
+}
 if ($searchQuery !== '' && isset($_GET['view']) && $_GET['view'] === 'playlists') {
     header('Location: index.php?q=' . rawurlencode($searchQuery));
     exit;
@@ -28,12 +33,21 @@ if ($searchQuery !== '') {
 
 $songs = get_discover_songs($conn, $searchQuery);
 $songCount = count($songs);
+
+if (isset($_GET['deleted'])) {
+    $flashAlert = '<div class="alert">Song deleted.</div>';
+} elseif (isset($_GET['updated'])) {
+    $flashAlert = '<div class="alert">Song updated.</div>';
+} else {
+    $flashAlert = '';
+}
 ?>
 
 <header class="page-heading">
-    <h1>Good evening</h1>
+    <h1><?php echo htmlspecialchars(get_time_greeting()); ?></h1>
     <p>Browse tracks and public playlists from the community.</p>
 </header>
+<?php echo $flashAlert; ?>
 
 <form method="get" action="index.php" class="mb-5 w-full max-w-md" role="search">
     <input type="hidden" name="view" value="songs">
@@ -82,7 +96,15 @@ $songCount = count($songs);
             <div class="song-list divide-y divide-spotify-elevated rounded-lg bg-spotify-highlight/40">
                 <?php
                 foreach ($songs as $row) {
-                    render_song_item($row, false, $isLoggedIn, $isLoggedIn && is_favorite($favoriteIds, (int) $row['id']));
+                    render_song_item(
+                        $row,
+                        false,
+                        $isLoggedIn,
+                        $isLoggedIn && is_favorite($favoriteIds, (int) $row['id']),
+                        0,
+                        $isAdmin,
+                        $homeRedirect
+                    );
                 }
                 ?>
             </div>
@@ -95,7 +117,7 @@ $songCount = count($songs);
         <?php else: ?>
             <div class="card-grid">
                 <?php foreach ($publicPlaylists as $playlist): ?>
-                    <?php render_playlist_card($conn, $playlist, $userId, false); ?>
+                    <?php render_playlist_card($conn, $playlist, $userId, false, $isAdmin, $homeRedirect); ?>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>

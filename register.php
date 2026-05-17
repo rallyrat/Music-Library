@@ -29,6 +29,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'All fields are required.';
     } elseif (strlen($form['name']) > 15 || strlen($form['surname']) > 15) {
         $error = 'Name and surname must be at most 15 characters.';
+    } elseif (!is_valid_person_name($form['name']) || !is_valid_person_name($form['surname'])) {
+        $error = 'Name and surname can only contain letters, spaces, hyphens, and apostrophes.';
     } elseif (!filter_var($form['email'], FILTER_VALIDATE_EMAIL)) {
         $error = 'Please enter a valid email address.';
     } elseif (!preg_match('/^\d{8}$/', $form['mobile'])) {
@@ -118,11 +120,13 @@ $labelClass = 'mb-1 block text-sm font-medium text-spotify-muted';
     <div>
         <label for="name" class="<?php echo $labelClass; ?>">Name</label>
         <input type="text" id="name" name="name" maxlength="15" required class="<?php echo $inputClass; ?>" placeholder="Name"
+               pattern="[A-Za-z][A-Za-z\s'-]*" title="Letters only"
                value="<?php echo htmlspecialchars($form['name']); ?>">
     </div>
     <div>
         <label for="surname" class="<?php echo $labelClass; ?>">Surname</label>
         <input type="text" id="surname" name="surname" maxlength="15" required class="<?php echo $inputClass; ?>" placeholder="Surname"
+               pattern="[A-Za-z][A-Za-z\s'-]*" title="Letters only"
                value="<?php echo htmlspecialchars($form['surname']); ?>">
     </div>
     <div>
