@@ -23,6 +23,9 @@ if ($isLoggedIn) {
     require_once __DIR__ . '/../includes/uploads.php';
 }
 
+$appCssPath = dirname(__DIR__) . '/assets/css/app.css';
+$appCssVersion = is_file($appCssPath) ? (string) filemtime($appCssPath) : '1';
+
 if (!function_exists('render_logo_mark')) {
     function render_logo_mark(int $size = 32, string $class = 'site-logo__icon'): void
     {
@@ -66,7 +69,6 @@ if (!function_exists('render_logo_mark')) {
             },
         };
     </script>
-    <link rel="stylesheet" href="<?php echo $pathPrefix; ?>assets/css/app.css">
 </head>
 <body class="h-full bg-spotify-base text-white antialiased<?php echo $usePlayer ? ' has-player' : ''; ?>">
 <div class="flex h-full min-h-screen">

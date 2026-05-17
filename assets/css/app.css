@@ -2,6 +2,25 @@
    Music Library — consolidated styles
    ========================================================================== */
 
+/* Chrome autofill on dark inputs (register, login, etc.) */
+.form-input-dark:-webkit-autofill,
+.form-input-dark:-webkit-autofill:hover,
+.form-input-dark:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #121212 inset !important;
+    box-shadow: 0 0 0 1000px #121212 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #ffffff;
+    transition: background-color 9999s ease-out 0s;
+}
+
+/* Register / profile avatar inside fixed Tailwind size box */
+.h-28.w-28 .avatar-edit.avatar--lg {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+}
+
 :root {
     --player-height: 90px;
     --player-bg: #181818;

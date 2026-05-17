@@ -104,16 +104,16 @@ if ($avatarDisplayName === '') {
 <?php endif; ?>
 
 <?php
-$inputClass = 'w-full rounded-md border border-spotify-elevated bg-spotify-base px-4 py-3 text-white placeholder:text-spotify-muted focus:border-spotify-green focus:outline-none focus:ring-1 focus:ring-spotify-green';
+$inputClass = 'form-input-dark w-full rounded-md border border-spotify-elevated bg-spotify-base px-4 py-3 text-white placeholder:text-spotify-muted focus:border-spotify-green focus:outline-none focus:ring-1 focus:ring-spotify-green';
 $labelClass = 'mb-1 block text-sm font-medium text-spotify-muted';
 ?>
 
 <form method="post" id="register-form" enctype="multipart/form-data" class="mx-auto max-w-md space-y-4 rounded-xl bg-spotify-highlight p-6">
-    <div class="register-avatar">
-        <div class="register-avatar__picker">
+    <div class="flex flex-col items-center gap-2">
+        <div class="relative h-28 w-28 shrink-0 overflow-hidden rounded-full">
             <?php render_user_avatar_editable(null, $avatarDisplayName, 'lg', true); ?>
         </div>
-        <p class="register-avatar__hint">Optional · JPG, PNG, GIF, or WebP</p>
+        <p class="m-0 text-center text-xs text-spotify-muted">Optional · JPG, PNG, GIF, or WebP</p>
     </div>
     <div>
         <label for="name" class="<?php echo $labelClass; ?>">Name</label>

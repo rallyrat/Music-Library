@@ -6,6 +6,11 @@
 $usePlayer = $usePlayer ?? true;
 $pathPrefix = $pathPrefix ?? ((str_contains($_SERVER['PHP_SELF'] ?? '', '/admin/')) ? '../' : '');
 
+if (!isset($appCssVersion)) {
+    $appCssPath = __DIR__ . '/../assets/css/app.css';
+    $appCssVersion = is_file($appCssPath) ? (string) filemtime($appCssPath) : '1';
+}
+
 if ($usePlayer):
 ?>
 <div id="player-bar" class="player-bar player-bar--empty" aria-label="Music player">
@@ -60,5 +65,6 @@ if ($usePlayer):
         </main>
     </div>
 </div>
+<link rel="stylesheet" href="<?php echo $pathPrefix; ?>assets/css/app.css?v=<?php echo htmlspecialchars($appCssVersion, ENT_QUOTES, 'UTF-8'); ?>">
 </body>
 </html>
