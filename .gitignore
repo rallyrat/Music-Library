@@ -1,4 +1,5 @@
 includes/config.php
+*.zip
 uploads/profiles/*
 uploads/songs/*
 uploads/covers/*

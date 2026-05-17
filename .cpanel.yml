@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/musiclib/public_html/
+    - /bin/rsync -av --delete --exclude='.git' --exclude='.cpanel.yml' --exclude='includes/db.php' --exclude='database/' --exclude='README.md' ./ $DEPLOYPATH
