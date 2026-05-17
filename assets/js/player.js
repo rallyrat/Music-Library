@@ -94,6 +94,10 @@
         return mins + ':' + String(secs).padStart(2, '0');
     }
 
+    function appPathPrefix() {
+        return typeof window.APP_PATH_PREFIX === 'string' ? window.APP_PATH_PREFIX : '';
+    }
+
     function normalizeSrc(src) {
         if (!src) {
             return '';
@@ -104,10 +108,33 @@
             if (uploadsIdx !== -1) {
                 return path.slice(uploadsIdx + 1);
             }
-            return path.replace(/^\//, '');
+            return path.replace(/^\//, '').replace(/^\.\.\//, '');
         } catch (e) {
+            return String(src).replace(/^\.\.\//, '');
+        }
+    }
+
+    /** Resolve uploads/... paths from site root (works on /admin/ pages too). */
+    function resolveMediaSrc(src) {
+        if (!src) {
+            return '';
+        }
+        if (/^https?:\/\//i.test(src)) {
             return src;
         }
+
+        const canonical = normalizeSrc(src);
+        const base = appPathPrefix();
+        if (!canonical) {
+            return src;
+        }
+        if (base && canonical.indexOf(base) === 0) {
+            return canonical;
+        }
+        if (base) {
+            return base + canonical;
+        }
+        return canonical;
     }
 
     function srcMatches(a, b) {
@@ -205,9 +232,12 @@
     }
 
     function applyTrackToPlayer(src, title, artist, button, autoplay, seekTime) {
+        const canonicalSrc = normalizeSrc(src) || src;
+        const playbackSrc = resolveMediaSrc(canonicalSrc);
+
         setTrackInfo(title, artist);
-        audio.dataset.trackSrc = src;
-        audio.src = src;
+        audio.dataset.trackSrc = canonicalSrc;
+        audio.src = playbackSrc;
         audio.load();
         setActiveButton(button, autoplay);
         setPlayIcon(autoplay);

@@ -75,13 +75,19 @@ function delete_upload_file(?string $relativePath): void
     }
 }
 
+/** Web path prefix when the current script lives under admin/ (e.g. ../). */
+function app_path_prefix(): string
+{
+    return str_contains($_SERVER['PHP_SELF'] ?? '', '/admin/') ? '../' : '';
+}
+
 function upload_url(?string $relativePath): ?string
 {
     if ($relativePath === null || trim($relativePath) === '') {
         return null;
     }
 
-    return $relativePath;
+    return app_path_prefix() . ltrim($relativePath, '/');
 }
 
 function user_initials(string $name): string

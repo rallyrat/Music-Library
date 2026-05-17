@@ -58,7 +58,7 @@ if ($usePlayer):
 </div>
 
 <audio id="player-audio" preload="metadata"></audio>
-<script src="<?php echo $pathPrefix; ?>assets/js/player.js?v=5"></script>
+<script src="<?php echo $pathPrefix; ?>assets/js/player.js?v=6"></script>
 <?php endif; ?>
 <script src="https://unpkg.com/just-validate@4.3.0/dist/just-validate.production.min.js"></script>
 <script src="<?php echo $pathPrefix; ?>assets/js/form-validation.js?v=3"></script>

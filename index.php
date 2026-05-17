@@ -44,7 +44,7 @@ if (isset($_GET['deleted'])) {
 ?>
 
 <header class="page-heading">
-    <h1><?php echo htmlspecialchars(get_time_greeting()); ?></h1>
+    <h1 id="home-greeting"><?php echo htmlspecialchars(get_time_greeting()); ?></h1>
     <p>Browse tracks and public playlists from the community.</p>
 </header>
 <?php echo $flashAlert; ?>
@@ -125,6 +125,7 @@ if (isset($_GET['deleted'])) {
 </div>
 
 <script src="assets/js/view-tabs.js" defer></script>
+<script src="assets/js/home-greeting.js" defer></script>
 
 <?php
 require_once __DIR__ . '/elements/footer.php';

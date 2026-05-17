@@ -69,6 +69,7 @@ if (!function_exists('render_logo_mark')) {
             },
         };
     </script>
+    <script>window.APP_PATH_PREFIX = <?php echo json_encode($pathPrefix, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;</script>
 </head>
 <body class="h-full bg-spotify-base text-white antialiased<?php echo $usePlayer ? ' has-player' : ''; ?>">
 <div class="flex h-full min-h-screen">
