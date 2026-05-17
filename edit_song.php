@@ -122,6 +122,7 @@ $currentFile = basename($song['file_path'] ?? 'Unknown');
         <p class="mb-2 text-xs text-spotify-muted">Current file: <?php echo htmlspecialchars($currentFile); ?></p>
         <input type="file" id="audio-file" name="audio" accept="audio/*" class="<?php echo $inputClass; ?>">
     </div>
+    <p id="metadata-hint" class="text-sm text-spotify-green" aria-live="polite"></p>
 
     <div class="flex flex-wrap gap-3 pt-2">
         <button type="submit"
@@ -134,5 +135,8 @@ $currentFile = basename($song['file_path'] ?? 'Unknown');
         </a>
     </div>
 </form>
+
+<script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.7/dist/jsmediatags.min.js" defer></script>
+<script src="assets/js/add-song-metadata.js?v=4" defer></script>
 
 <?php require_once __DIR__ . '/elements/footer.php'; ?>

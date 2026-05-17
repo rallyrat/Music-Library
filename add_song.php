@@ -102,7 +102,7 @@ $labelClass = 'mb-1 block text-sm font-medium text-spotify-muted';
     </div>
 </form>
 
-<script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.7/dist/jsmediatags.min.js"></script>
-<script src="assets/js/add-song-metadata.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsmediatags@3.9.7/dist/jsmediatags.min.js" defer></script>
+<script src="assets/js/add-song-metadata.js?v=4" defer></script>
 
 <?php require_once __DIR__ . '/elements/footer.php'; ?>
