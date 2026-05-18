@@ -44,7 +44,14 @@ if (isset($_GET['deleted'])) {
 ?>
 
 <header class="page-heading">
-    <h1 id="home-greeting"><?php echo htmlspecialchars(get_time_greeting()); ?></h1>
+    <h1 id="home-greeting">Good Morning</h1>
+    <script>
+    (function () {
+        var hour = new Date().getHours();
+        document.getElementById('home-greeting').textContent =
+            hour >= 17 ? 'Good Evening' : 'Good Morning';
+    })();
+    </script>
     <p>Browse tracks and public playlists from the community.</p>
 </header>
 <?php echo $flashAlert; ?>
@@ -125,7 +132,6 @@ if (isset($_GET['deleted'])) {
 </div>
 
 <script src="assets/js/view-tabs.js" defer></script>
-<script src="assets/js/home-greeting.js" defer></script>
 
 <?php
 require_once __DIR__ . '/elements/footer.php';
